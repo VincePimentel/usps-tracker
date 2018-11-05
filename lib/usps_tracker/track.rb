@@ -1,0 +1,3 @@
+class UspsTracker::Track
+
+end

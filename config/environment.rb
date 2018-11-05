@@ -1,0 +1,10 @@
+require "nokogiri"
+require "open-uri"
+require "pry"
+
+require_relative "../lib/usps_tracker"
+require_relative "../lib/usps_tracker/cli"
+require_relative "../lib/usps_tracker/lookup"
+require_relative "../lib/usps_tracker/track"
+require_relative "../lib/usps_tracker/scraper"
+require_relative "../lib/usps_tracker/version"
