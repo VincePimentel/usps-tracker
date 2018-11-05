@@ -1,3 +1,4 @@
+require "nokogiri"
 require "pry"
 
 class UspsTracker::Scraper
@@ -12,8 +13,8 @@ class UspsTracker::Scraper
     @server_url = "https://secure.shippingapis.com/ShippingAPI.dll"
   end
 
-  def self.valid_user_id?(user_id)
-    user_id = Nokogiri::XML(open("#{@url}" + '?API=Verify&XML=<AddressValidateRequest USERID=' + "\"#{@user_id}\"" + '></AddressValidateRequest>'))
-    puts user_id
+  def valid_user_id?(user_id)
+    xml = Nokogiri::XML(open(server_url + '?API=Verify&XML=<AddressValidateRequest USERID=' + @user_id + '></AddressValidateRequest>'))
+    binding.pry
   end
 end

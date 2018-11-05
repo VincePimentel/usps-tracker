@@ -73,7 +73,7 @@ class UspsTracker::CLI
   def menu
     user_id = @option
     user = user_id.gsub(/\d/, "").capitalize
-    #Scraper.new(user_id)
+    Scraper.new(253VINCE6398)
     @option = ""
 
     until @option == "TRACK" || @option == "LOOKUP" || @option == "EXIT"
