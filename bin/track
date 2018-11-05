@@ -2,4 +2,4 @@
 
 require_relative "../config/environment"
 
-UspsTracker::CLI.new.login
+UspsTracker::CLI.new.start

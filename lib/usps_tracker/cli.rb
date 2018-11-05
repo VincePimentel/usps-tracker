@@ -1,49 +1,24 @@
 class UspsTracker::CLI
-  def spacer
-    puts ""
-  end
-
-  def border
-    puts "=" * 44
-  end
-
-  def top_border_spacer
-    spacer
-    border
-  end
-
-  def bottom_border_spacer
-    border
-    spacer
-  end
-
-  def full_border_spacer
-    spacer
-    border
-    spacer
-  end
-
-  def login
-    top_border_spacer
-    puts "United States Postal Service Package Tracker"
-    bottom_border_spacer
+  def start
+    banner("United States Postal Service Package Tracker")
     puts "To use the tracker, you must be a registered user."
     puts "Please enter your user ID or any options below to proceed:"
     spacer
     puts "    info : Get information on how to request a user ID."
-    puts "    exit : Terminate the program."
+    exit_option
+    puts "    REMOVE ME: 253VINCE6398"
     spacer
     @option = gets.strip.upcase
 
     case @option
     when "INFO" then info
     when "EXIT" then exit
-    else menu
+    else user_check
     end
   end
 
   def info
-    full_border_spacer
+    banner("INFORMATION")
     puts "Please visit http://www.usps.com/webtools/"
     puts "Follow the instructions to register for the APIs and get a Web Tools User ID."
     spacer
@@ -58,31 +33,47 @@ class UspsTracker::CLI
       spacer
       puts "What would you like to do?"
       spacer
-      puts "    login : Return to the option prompt."
-      puts "    exit : Terminate the program"
+      puts "    login : Return to the initial screen."
+      exit_option
       spacer
       @option = gets.strip.upcase
     end
 
     case @option
-    when "LOGIN" then login
+    when "LOGIN" then start
     when "EXIT" then exit
     end
   end
 
+  def user_check
+    until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "EXIT"
+      banner("AUTHORIZATION FAILURE")
+      puts "Username is incorrect or does not exist. Please try again or any options below to proceed:"
+      spacer
+      puts "    info : Get information on how to request a user ID."
+      exit_option
+      spacer
+      @option = gets.strip.upcase
+    end
+
+    case @option
+    when "INFO" then info
+    when "EXIT" then exit
+    else menu
+    end
+  end
+
   def menu
-    user_id = @option
-    user = user_id.gsub(/\d/, "").capitalize
-    Scraper.new(253VINCE6398)
+    user = @option.gsub(/\d/, "").capitalize
     @option = ""
 
     until @option == "TRACK" || @option == "LOOKUP" || @option == "EXIT"
-      full_border_spacer
+      banner("MENU")
       puts "Welcome, #{user}! What would you like to do today?"
       spacer
       puts "    track : Track a package via a tracking number."
       puts "    lookup : Correct address errors or find a city/state/ZIP given an incomplete address information."
-      puts "    exit : Terminate the program"
+      exit_option
       spacer
       @option = gets.strip.upcase
     end
@@ -95,8 +86,40 @@ class UspsTracker::CLI
   end
 
   def exit
+    banner("Goodbye! Have a nice day!")
+  end
+
+  def exit_option
+    puts "    exit : Terminate the program."
+  end
+
+  def banner(message)
+    top_border_spacer(message.length)
+    puts message
+    bottom_border_spacer(message.length)
+  end
+
+  def spacer
+    puts ""
+  end
+
+  def border(length = 1)
+    puts "=" * length
+  end
+
+  def top_border_spacer(length = 1)
     spacer
-    puts "Goodbye! Have a nice day!"
+    border(length)
+  end
+
+  def bottom_border_spacer(length = 1)
+    border(length)
+    spacer
+  end
+
+  def full_border_spacer(length = 1)
+    spacer
+    border(length)
     spacer
   end
 end
