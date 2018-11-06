@@ -10,6 +10,10 @@ class UspsTracker::Lookup
     @@all << self
   end
 
+  def state?(state)
+    
+  end
+
   def self.all
     @@all
   end
