@@ -142,7 +142,8 @@ class UspsTracker::CLI
   end
 
   def skip
-    #FOR TESTING PURPOSES, ADDRESS POINTS TO BOBA GUYS
+    #FOR TESTING PURPOSES(SKIPPING MANUAL ENTRY OF ADDRESS
+    #ADDRESS POINTS TO BOBA GUYS
     @address_1 = ""
     @address_2 = "3491 19th"
     @city = "San Francisco"
@@ -164,7 +165,8 @@ class UspsTracker::CLI
       zip_4: @zip_4
       }
 
-    address = UspsTracker::Lookup.new(address_hash)
+    #address =
+    UspsTracker::Lookup.new(address_hash)
   end
 
   def get_address_1

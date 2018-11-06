@@ -1,21 +1,42 @@
 class UspsTracker::Scraper
   attr_accessor :user_id
-  #attr_reader :host, :xml, :lookup_verify, :lookup_verify_end, :lookup_zip_code, :lookup_zip_code_end, :lookup_city_state, :lookup_city_state_end, :track_number, :track_number_end, :track_email, :track_email_end
+  #attr_reader :host, :xml, :lookup_validate, :lookup_validate_end, :lookup_zip_code, :lookup_zip_code_end, :lookup_city_state, :lookup_city_state_end, :track_number, :track_number_end, :track_email, :track_email_end
 
   def initialize(user_id)
-    @user_id = " USERID='#{user_id}'>"
     @host = "https://secure.shippingapis.com/ShippingAPI.dll?API="
-    @xml = "&XML=<"
-    @lookup_verify = "Verify#{@xml}AddressValidateRequest"
-    @lookup_verify_end = "</AddressValidateRequest>"
-    @lookup_zip_code = "ZipCodeLookup#{@xml}ZipCodeLookupRequest"
-    @lookup_zip_code_end = "</ZipCodeLookupRequest>"
-    @lookup_city_state = "CityStateLookup#{@xml}CityStateLookupRequest"
-    @lookup_city_state_end = "</CityStateLookupRequest>"
-    @track_number = "TrackV2#{@xml}TrackFieldRequest"
-    @track_number_end = "</TrackFieldRequest>"
-    @track_email = "PTSEmail#{@xml}PTSEmailRequest"
+    @xml = "&XML="
+    @user_id = "USERID='#{user_id}'"
+
+    #API SIGNATURE FORMAT - <Host><API><XML><API Request><User>DATA</API Request>
+    @lookup_validate_api = "AddressValidateRequest"
+    @lookup_validate_start = "#{@host}Verify#{@xml}<#{@lookup_validate_api} #{@user_id}>"
+    @lookup_validate_end = "</#{@lookup_validate_api}>"
+    #https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML=<AddressValidateRequest USERID=”user_id”>DATA</AddressValidateRequest>
+
+    @lookup_zip_code_api = "ZipCodeLookupRequest"
+    @lookup_zip_code_start = "#{@host}#{@lookup_zip_code_api.gsub("Request", "")}#{@xml}<#{@lookup_zip_code_api} #{@user_id}>"
+    @lookup_zip_code_end = "</#{@lookup_zip_code_api}>"
+    #https://secure.shippingapis.com/ShippingAPI.dll?API=ZipCodeLookup&XML=<ZipCodeLookupRequest USERID=”user_id”>DATA</ZipCodeLookupRequest>
+
+    @lookup_city_state_api = "CityStateLookupRequest"
+    @lookup_city_state_start = "#{@host}#{@lookup_city_state_api.gsub("Request", "")}#{@xml}<#{@lookup_city_state_api} #{@user_id}>"
+    @lookup_city_state_end = "</#{@lookup_city_state_api}>"
+    #https://secure.shippingapis.com/ShippingAPI.dll?API=CityStateLookup&XML=<CityStateLookupRequest USERID=”user_id”>DATA</CityStateLookupRequest>
+
+    @track_request_api = "TrackRequest"
+    @track_request_start = "#{@host}TrackV2#{@xml}<#{@track_request_api} #{@user_id}>"
+    @track_request_end = "</#{@track_request_api}>"
+    #https://stg-secure.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=<TrackRequest USERID=”user_id”>DATA</TrackRequest>
+
+    @track_fields_api = ""
+    @track_fields_start = ""
+    @track_fields_end = ""
+    #https://secure.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=<TrackFieldRequest USERID=”user_id”>DATA</TrackFieldRequest>
+
+    @track_email_api = ""
+    @track_email_start = "PTSEmail#{@xml}<PTSEmailRequest #{@user_id}>"
     @track_email_end = "</PTSEmailRequest>"
+    #https://secure.shippingapis.com/ShippingAPI.dll?API=PTSEmail&XML=<PTSEmailRequest USERID=”user_id”>DATA</PTSEmailRequest>
   end
 
   def valid_user?
@@ -30,9 +51,9 @@ class UspsTracker::Scraper
   end
 
   #LOOKUP METHODS
-  def address_verify(firm_name, address_1, address_2, city, state, urbanization, zip_5, zip_4)
+  def address_validate(firm_name, address_1, address_2, city, state, urbanization, zip_5, zip_4)
     address_xml = Nokogiri::XML(open(
-      @host + @lookup_verify + @user_id + "
+      @host + @lookup_validate + @user_id + "
       <Address ID='0'>
         <FirmName>#{firm_name}</FirmName>
         <Address1>#{address_1}</Address1>
@@ -43,7 +64,7 @@ class UspsTracker::Scraper
         <Zip5>#{zip_5}</Zip5>
         <Zip4>#{zip_4}</Zip4>
       </Address>
-      " + @lookup_verify_end
+      " + @lookup_validate_end
       ))
 
     address = {

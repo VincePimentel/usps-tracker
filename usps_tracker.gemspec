@@ -6,8 +6,8 @@ require "usps_tracker/version"
 Gem::Specification.new do |spec|
   spec.name          = "usps_tracker"
   spec.version       = UspsTracker::VERSION
-  spec.authors       = ["'Vince Andrew Pimentel'"]
-  spec.email         = ["'contact@vincep.me'"]
+  spec.authors       = ["Vince Andrew Pimentel"]
+  spec.email         = ["contact@vincep.me"]
 
   spec.summary       = ""#%q{TODO: Write a short summary, because RubyGems requires one.}
   spec.description   = ""#%q{TODO: Write a longer description or delete this line.}
