@@ -18,12 +18,15 @@ class UspsTracker::CLI
     case @option
     when "INFO" then info
     when "EXIT" then exit
-    when "" then @option = "253VINCE6398"; user_check
-    else user_check
+    when "" then @option = "253VINCE6398"; validate_user#REMOVE ME
+    else validate_user
     end
   end
 
   def info
+    @current_menu = "info"
+    @option = ""
+
     banner("INFORMATION")
     puts "Please visit http://www.usps.com/webtools/"
     puts "Follow the instructions to register for the APIs and get a Web Tools User ID."
@@ -33,30 +36,31 @@ class UspsTracker::CLI
     spacer
     puts "You will be immediately granted access to the production server for the price calculators,"
     puts "package tracking, address information and service standards and commitments APIs."
-    @option = ""
 
-    until @option == "LOGIN" || @option == "EXIT"
+    until @option == "LOGIN" || @option == "BACK" || @option == "EXIT"
       spacer
       puts "What would you like to do?"
       spacer
-      puts "    login : Return to the initial screen."
+      back_option
       exit_option
       spacer
       @option = gets.strip.upcase
     end
 
     case @option
-    when "LOGIN" then start
+    when "BACK" then back
     when "EXIT" then exit
     end
   end
 
-  def user_check
-    until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "EXIT"
+  def validate_user
+    @current_menu = "validate_user"
+    until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "BACK" || @option == "EXIT"
       banner("AUTHORIZATION FAILURE")
       puts "User ID, #{@option}, is incorrect or does not exist. Please try again or any options below to proceed:"
       spacer
       puts "    info : Get information on how to request a user ID."
+      back_option
       exit_option
       spacer
       @option = gets.strip.upcase
@@ -64,6 +68,7 @@ class UspsTracker::CLI
 
     case @option
     when "INFO" then info
+    when "BACK" then back
     when "EXIT" then exit
     else menu
     end
@@ -97,7 +102,7 @@ class UspsTracker::CLI
     @current_menu = "lookup"
     @option = ""
 
-    until @option == "CLEANSE" || @option == "CITY" || @option == "STATE" || @option == "ZIP" || @option == "EXIT"
+    until @option == "CLEANSE" || @option == "CITY" || @option == "STATE" || @option == "ZIP" || @option == "BACK" || @option == "EXIT"
       banner("City/State/ZIP Code Lookup and Address Standardization Tool")
       puts "What would you like to do or look up?"
       spacer
@@ -112,9 +117,9 @@ class UspsTracker::CLI
 
     case @option
     when "CLEANSE" then cleanse
-    when "CITY" then puts "CITY"
-    when "STATE" then puts "STATE"
-    when "ZIP" then puts "ZIP"
+    when "CITY" then puts "CITY WIP"
+    when "STATE" then puts "STATE WIP"
+    when "ZIP" then puts "ZIP WIP"
     when "BACK" then back
     when "EXIT" then exit
     else lookup
@@ -123,6 +128,8 @@ class UspsTracker::CLI
 
   def cleanse
     @current_menu = "cleanse"
+    @option = ""
+
     banner("Address Standardization Tool")
     puts "Corrects errors in street addresses, including abbreviations and missing information, and supplies ZIP Codes and ZIP Codes + 4."
     spacer
@@ -165,7 +172,6 @@ class UspsTracker::CLI
       zip_4: @zip_4
       }
 
-    #address =
     UspsTracker::Lookup.new(address_hash)
   end
 
@@ -176,7 +182,7 @@ class UspsTracker::CLI
     spacer
 
     case @address_1
-    when "SKIP" then skip
+    when "SKIP" then skip#REMOVE ME
     when "BACK" then back
     when "EXIT" then exit
     when "UNDO" then get_address_1; get_address_2
@@ -185,7 +191,7 @@ class UspsTracker::CLI
 
   def get_address_2
     @address_2 = ""
-    until @address_2 == "EXIT" || @address_2.length >= 3
+    until @address_2 == "BACK" || @address_2 == "EXIT" || @address_2 == "UNDO" || @address_2.length >= 3
       puts "Enter Street Address:"
       @address_2 = gets.strip.upcase
       spacer
@@ -200,7 +206,7 @@ class UspsTracker::CLI
 
   def get_city
     @city = ""
-    until @city == "EXIT" || @city.length >= 3
+    until @city == "BACK" || @city == "EXIT" || @city == "UNDO" || @city.length >= 3
       puts "Enter City:"
       @city = gets.strip.upcase
       spacer
@@ -215,7 +221,7 @@ class UspsTracker::CLI
 
   def get_state
     @state = ""
-    until @state == "EXIT" || @state.length >= 2
+    until @state == "BACK" || @state == "EXIT" || @state == "UNDO" || @state.length >= 2
       puts "Enter State:"
       @state = gets.strip.upcase
       spacer
@@ -245,6 +251,8 @@ class UspsTracker::CLI
   end
 
   def reset
+    @option = ""
+    @current_menu = ""
     @firm_name = ""
     @address_1 = ""
     @address_2 = ""
@@ -257,6 +265,7 @@ class UspsTracker::CLI
 
   def back
     case @current_menu
+    when "info" then start
     #when "track"
     when "lookup" then menu
     when "cleanse" then lookup
