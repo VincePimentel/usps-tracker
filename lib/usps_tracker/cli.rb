@@ -13,6 +13,7 @@ class UspsTracker::CLI
     case @option
     when "INFO" then info
     when "EXIT" then exit
+    when "" then @option = "253VINCE6398"; user_check
     else user_check
     end
   end
@@ -48,7 +49,7 @@ class UspsTracker::CLI
   def user_check
     until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "EXIT"
       banner("AUTHORIZATION FAILURE")
-      puts "Username is incorrect or does not exist. Please try again or any options below to proceed:"
+      puts "User ID, #{@option}, is incorrect or does not exist. Please try again or any options below to proceed:"
       spacer
       puts "    info : Get information on how to request a user ID."
       exit_option
@@ -64,6 +65,7 @@ class UspsTracker::CLI
   end
 
   def menu
+    user_id = @option
     user = @option.gsub(/\d/, "").capitalize
     @option = ""
 
@@ -80,9 +82,14 @@ class UspsTracker::CLI
 
     case @option
     when "TRACK" then puts "TRACK"
-    when "LOOKUP" then puts "LOOKUP"
+    when "LOOKUP" then lookup
     when "EXIT" then exit
     end
+  end
+
+  def lookup
+    banner("ZIP Code/City/State Lookup and Address Standardization Tool")
+    puts "This tool corrects errors in street addresses, including abbreviations and missing information, and supplies ZIP Codes and ZIP Codes + 4."
   end
 
   def exit
