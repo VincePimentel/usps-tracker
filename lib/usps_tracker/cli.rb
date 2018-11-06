@@ -5,6 +5,7 @@ class UspsTracker::CLI
 
   def start
     banner("United States Postal Service Package Tracker")
+    #display_date
     puts "To use the tracker, you must be a registered user."
     puts "Please enter your user ID or any options below to proceed:"
     spacer
@@ -234,6 +235,10 @@ class UspsTracker::CLI
   end
 
   def get_urbanization
+
+  end
+
+  def display_date
 
   end
 
