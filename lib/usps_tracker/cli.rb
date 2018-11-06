@@ -88,8 +88,38 @@ class UspsTracker::CLI
   end
 
   def lookup
-    banner("ZIP Code/City/State Lookup and Address Standardization Tool")
-    puts "This tool corrects errors in street addresses, including abbreviations and missing information, and supplies ZIP Codes and ZIP Codes + 4."
+    @option = ""
+
+    until @option == "CLEANSE" || @option == "CITY" || @option == "STATE" || @option == "ZIP" || @option == "EXIT"
+      banner("City/State/ZIP Code Lookup and Address Standardization Tool")
+      puts "What would you like to do or look up?"
+      spacer
+      puts "    cleanse : Corrects a given street, city and state and supplies ZIP codes."
+      puts "    city -OR- state : Returns the city and state corresponding to the given ZIP Code."
+      puts "    zip : Returns the ZIP Code and ZIP Code + 4 corresponding to the given address, city, and state."
+      exit_option
+      spacer
+      @option = gets.strip.upcase
+    end
+
+    case @option
+    when "CLEANSE" then cleanse
+    when "CITY" then puts "CITY"
+    when "STATE" then puts "STATE"
+    when "ZIP" then puts "ZIP"
+    when "EXIT" then exit
+    else lookup
+    end
+
+    #UspsTracker::Scraper.new(@user_id).address_verify("", "", "29851 AVENTURA", "", "CA", "", "92688", "")
+  end
+
+  def cleanse
+    banner("Address Standardization Tool")
+    puts "Corrects errors in street addresses, including abbreviations and missing information, and supplies ZIP Codes and ZIP Codes + 4."
+    spacer
+    puts "Enter street address:"
+    address_2 = gets.strip.upcase
   end
 
   def exit

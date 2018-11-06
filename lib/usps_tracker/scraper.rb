@@ -1,6 +1,6 @@
 class UspsTracker::Scraper
   attr_accessor :user_id
-  attr_reader :host, :xml, :lookup_verify, :lookup_verify_end, :lookup_zip_code, :lookup_zip_code_end, :lookup_city_state, :lookup_city_state_end, :track_number, :track_number_end, :track_email, :track_email_end
+  #attr_reader :host, :xml, :lookup_verify, :lookup_verify_end, :lookup_zip_code, :lookup_zip_code_end, :lookup_city_state, :lookup_city_state_end, :track_number, :track_number_end, :track_email, :track_email_end
 
   def initialize(user_id)
     @user_id = " USERID='#{user_id}'>"
@@ -45,9 +45,7 @@ class UspsTracker::Scraper
       </Address>
       " + @lookup_verify_end
       ))
-  end
 
-  def address
     address = {
       firm_name: address_xml.css("FirmName").text,
       address_1: address_xml.css("Address1").text,
@@ -57,7 +55,13 @@ class UspsTracker::Scraper
       urbanization: address_xml.css("Urbanization").text,
       zip_5: address_xml.css("Zip5").text,
       zip_4: address_xml.css("Zip4").text,
-      return_text: address_xml.css("ReturnText").text
+      return_text: address_xml.css("ReturnText").text,
+      error_number: address_xml.css("Number").text,
+      error_description: address_xml.css("Description").text,
     }.delete_if { |name, text| name.empty? || name.nil? || text.empty? || text.nil? }
+
+    address
+
+    binding.pry
   end
 end
