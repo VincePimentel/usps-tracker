@@ -3,7 +3,14 @@ class UspsTracker::Lookup
 
   @@all = Array.new
 
-  def initialize(xml_request)
+  def initialize(address_hash)
+    address_hash.each do |key, value|
+      self.send(("#{key}="), value)
+    end
+    @@all << self
+  end
 
+  def self.all
+    @@all
   end
 end
