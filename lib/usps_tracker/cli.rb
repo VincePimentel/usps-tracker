@@ -19,8 +19,14 @@ class UspsTracker::CLI
     when "INFO" then info
     when "EXIT" then exit
     when "" then @option = "253VINCE6398"; validate_user#REMOVE ME
+    when "TEST" then test#REMOVE ME
     else validate_user
     end
+  end
+
+  def test
+    UspsTracker::Address.cleansed_address
+    #binding.pry
   end
 
   def info
@@ -54,7 +60,7 @@ class UspsTracker::CLI
 
   def validate_user
     @current_menu = "validate_user"
-    until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "BACK" || @option == "EXIT"
+    until UspsTracker::Scraper.new.valid_user?(@option) || @option == "INFO" || @option == "BACK" || @option == "EXIT"
       banner("AUTHORIZATION FAILURE")
       puts "User ID, #{@option}, is incorrect or does not exist. Please try again:"
       commands_option
@@ -75,7 +81,7 @@ class UspsTracker::CLI
 
   def menu
     @current_menu = "menu"
-    user_id = @option
+    @user_id = @option
     user = @option.gsub(/\d/, "").capitalize
     @option = ""
 
@@ -146,6 +152,14 @@ class UspsTracker::CLI
     #get_zip_4
 
     correct_entry?
+    create_new_address
+    cleanse_address
+
+    binding.pry
+  end
+
+  def cleanse_address
+    UspsTracker::Address.validated_address
   end
 
   def address_hash
@@ -162,18 +176,7 @@ class UspsTracker::CLI
   end
 
   def create_new_address
-    UspsTracker::Lookup.new(address_hash)
-  end
-
-  def skip
-    #FOR TESTING PURPOSES(SKIPPING MANUAL ENTRY OF ADDRESS
-    #ADDRESS POINTS TO BOBA GUYS
-    @address_2 = "3491 19th"
-    @city = "San Francisco"
-    @state = "CA"
-    @zip_5 = "94110"
-
-    create_new_address
+    UspsTracker::Scraper.new(@user_id, address_hash)
   end
 
   def get_address_1
@@ -274,6 +277,17 @@ class UspsTracker::CLI
     when "Y" then create_new_address
     when "N" then cleanse
     end
+  end
+
+  def skip
+    #FOR TESTING PURPOSES(SKIPPING MANUAL ENTRY OF ADDRESS
+    #ADDRESS POINTS TO BOBA GUYS
+    @address_2 = "3491 19th"
+    @city = "San Francisco"
+    @state = "CA"
+    @zip_5 = "94110"
+
+    create_new_address
   end
 
   def reset

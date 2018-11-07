@@ -35,15 +35,9 @@ class UspsTracker::Scraper
   T_EMAIL_START = "#{HOST}#{T_EMAIL_API}#{XML}<#{T_EMAIL_API}Request #{ID}".freeze
   T_EMAIL_END = "</#{T_EMAIL_API}Request>".freeze
 
-  attr_reader :user_id
-
-  def initialize(user_id)
-    @user_id = user_id
-  end
-
-  def valid_user?
+  def valid_user?(user_id)
     !Nokogiri::XML(open(
-      L_CSTATE_START + "'#{@user_id}'>" + "
+      L_CSTATE_START + "'#{user_id}'>" + "
       <ZipCode ID='0'>
         <Zip5>90210</Zip5>
       </ZipCode>
@@ -52,19 +46,18 @@ class UspsTracker::Scraper
     #If document includes the error code "80040B1A", then not a valid user.
   end
 
-  #LOOKUP METHODS
-  def address_validate(firm_name, address_1, address_2, city, state, urbanization, zip_5, zip_4)
+  def validate_address(user_id, firm_name: "", address_1: "", address_2: "", city: "", state: "", urbanization: "", zip_5: "", zip_4: "")
     address_xml = Nokogiri::XML(open(
       "#{L_VALIDATE_START}'#{@user_id}'>" + "
       <Address ID='0'>
-        <FirmName>#{firm_name}</FirmName>
-        <Address1>#{address_1}</Address1>
-        <Address2>#{address_2}</Address2>
-        <City>#{city}</City>
-        <State>#{state}</State>
-        <Urbanization>#{urbanization}</Urbanization>
-        <Zip5>#{zip_5}</Zip5>
-        <Zip4>#{zip_4}</Zip4>
+        <FirmName>#{:firm_name}</FirmName>
+        <Address1>#{:address_1}</Address1>
+        <Address2>#{:address_2}</Address2>
+        <City>#{:city}</City>
+        <State>#{:state}</State>
+        <Urbanization>#{:urbanization}</Urbanization>
+        <Zip5>#{:zip_5}</Zip5>
+        <Zip4>#{:zip_4}</Zip4>
       </Address>
       " + "#{L_VALIDATE_END}"
       ))
@@ -84,8 +77,11 @@ class UspsTracker::Scraper
     }.delete_if { |name, text| name.empty? || name.nil? || text.empty? || text.nil? }
   end
 
-  def us_states
-    x = Nokogiri::HTML(open("https://gist.githubusercontent.com/mshafrir/2646763/raw/8b0dbb93521f5d6889502305335104218454c2bf/states_hash.json"))
+  def get_us_states
+    Nokogiri::HTML(open("https://gist.githubusercontent.com/mshafrir/2646763/raw/8b0dbb93521f5d6889502305335104218454c2bf/states_hash.json"))
+  end
+
+  def create_us_states
   end
 
   def syntax_check
