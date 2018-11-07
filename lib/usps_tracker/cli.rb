@@ -142,6 +142,8 @@ class UspsTracker::CLI
     get_address_2
     get_city
     get_state
+    #get_zip_5
+    #get_zip_4
 
     correct_entry?
   end
@@ -234,11 +236,9 @@ class UspsTracker::CLI
   end
 
   def get_zip_5
-
   end
 
   def get_zip_4
-
   end
 
   def get_urbanization
@@ -249,10 +249,21 @@ class UspsTracker::CLI
     @option = ""
 
     until @option == "Y" || @option == "N"
-      puts "Is this correct? (y -OR- n)"
+      puts "Is this correct? (y/n)"
+      spacer
 
       address_hash.each do |key, value|
-        puts "    #{key.to_s.gsub("_", " ").capitalize}: #{value}"
+        case key.to_s
+        when "address_1"
+          key = "apt / suite #".to_sym
+        when "address_2"
+          key = "street".to_sym
+        when "zip_5"
+          key = "z i p code".to_sym
+        when "zip_4"
+          key = "z i p code_+_4".to_sym
+        end
+        puts "    #{key.to_s.split.map(&:capitalize).join.gsub("_", " ")}: #{value}"
       end
 
       spacer
@@ -263,11 +274,6 @@ class UspsTracker::CLI
     when "Y" then create_new_address
     when "N" then cleanse
     end
-  end
-
-  #UI Methods
-  def display_date
-
   end
 
   def reset
@@ -281,6 +287,11 @@ class UspsTracker::CLI
     @urbanization = ""
     @zip_5 = ""
     @zip_4 = ""
+  end
+
+  #UI Methods
+  def display_date
+
   end
 
   def commands_option
