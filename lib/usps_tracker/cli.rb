@@ -7,8 +7,8 @@ class UspsTracker::CLI
     banner("United States Postal Service Package Tracker")
     #display_date
     puts "To use the tracker, you must be a registered user."
-    puts "Please enter your user ID or any options below to proceed:"
-    spacer
+    puts "Please enter your user ID:"
+    commands_option
     puts "    info : Get information on how to request a user ID."
     exit_option
     puts "    REMOVE ME: 253VINCE6398"
@@ -31,8 +31,7 @@ class UspsTracker::CLI
     puts "Please visit http://www.usps.com/webtools/"
     puts "Follow the instructions to register for the APIs and get a Web Tools User ID."
     spacer
-    puts "Upon completion of the registration process,"
-    puts "your user ID will be sent via e-mail to the address specified in the registration."
+    puts "Your user ID will be sent via e-mail to the address specified in the registration."
     spacer
     puts "You will be immediately granted access to the production server for the price calculators,"
     puts "package tracking, address information and service standards and commitments APIs."
@@ -57,8 +56,8 @@ class UspsTracker::CLI
     @current_menu = "validate_user"
     until UspsTracker::Scraper.new(@option).valid_user? || @option == "INFO" || @option == "BACK" || @option == "EXIT"
       banner("AUTHORIZATION FAILURE")
-      puts "User ID, #{@option}, is incorrect or does not exist. Please try again or any options below to proceed:"
-      spacer
+      puts "User ID, #{@option}, is incorrect or does not exist. Please try again:"
+      commands_option
       puts "    info : Get information on how to request a user ID."
       back_option
       exit_option
@@ -104,7 +103,7 @@ class UspsTracker::CLI
 
     until @option == "CLEANSE" || @option == "CITY" || @option == "STATE" || @option == "ZIP" || @option == "BACK" || @option == "EXIT"
       banner("City/State/ZIP Code Lookup and Address Standardization Tool")
-      puts "What would you like to do or look up?"
+      puts "What would you like to do or look up today?"
       spacer
       puts "    cleanse : Corrects a given street, city and state and supplies ZIP codes."
       puts "    city -OR- state : Returns the city and state corresponding to the given ZIP Code."
@@ -132,9 +131,8 @@ class UspsTracker::CLI
 
     banner("Address Standardization Tool")
     puts "Corrects errors in street addresses, including abbreviations and missing information, and supplies ZIP Codes and ZIP Codes + 4."
-    spacer
-    puts "Optional commands:"
-    spacer
+    commands_option
+    undo_option
     back_option
     exit_option
     puts "    REMOVE ME: skip"
@@ -145,23 +143,11 @@ class UspsTracker::CLI
     get_city
     get_state
 
-    create_address
+    correct_entry?
   end
 
-  def skip
-    #FOR TESTING PURPOSES(SKIPPING MANUAL ENTRY OF ADDRESS
-    #ADDRESS POINTS TO BOBA GUYS
-    @address_1 = ""
-    @address_2 = "3491 19th"
-    @city = "San Francisco"
-    @state = "CA"
-    @zip_5 = "94110"
-
-    create_address
-  end
-
-  def create_address
-    address_hash = {
+  def address_hash
+    {
       firm_name: @firm_name,
       address_1: @address_1,
       address_2: @address_2,
@@ -170,9 +156,22 @@ class UspsTracker::CLI
       urbanization: @urbanization,
       zip_5: @zip_5,
       zip_4: @zip_4
-      }
+    }.delete_if { |key, value| value.empty? || value.nil? }
+  end
 
+  def create_new_address
     UspsTracker::Lookup.new(address_hash)
+  end
+
+  def skip
+    #FOR TESTING PURPOSES(SKIPPING MANUAL ENTRY OF ADDRESS
+    #ADDRESS POINTS TO BOBA GUYS
+    @address_2 = "3491 19th"
+    @city = "San Francisco"
+    @state = "CA"
+    @zip_5 = "94110"
+
+    create_new_address
   end
 
   def get_address_1
@@ -246,6 +245,27 @@ class UspsTracker::CLI
 
   end
 
+  def correct_entry?
+    @option = ""
+
+    until @option == "Y" || @option == "N"
+      puts "Is this correct? (y -OR- n)"
+
+      address_hash.each do |key, value|
+        puts "    #{key.to_s.gsub("_", " ").capitalize}: #{value}"
+      end
+
+      spacer
+      @option = gets.strip.upcase
+    end
+
+    case @option
+    when "Y" then create_new_address
+    when "N" then cleanse
+    end
+  end
+
+  #UI Methods
   def display_date
 
   end
@@ -261,6 +281,16 @@ class UspsTracker::CLI
     @urbanization = ""
     @zip_5 = ""
     @zip_4 = ""
+  end
+
+  def commands_option
+    spacer
+    puts "Additional commands:"
+    spacer
+  end
+
+  def undo_option
+    puts "    undo : Make a change to the last entry."
   end
 
   def back
@@ -281,8 +311,8 @@ class UspsTracker::CLI
   end
 
   def exit
+    reset
     banner("Goodbye! Have a nice day!")
-    exit!
   end
 
   def exit_option

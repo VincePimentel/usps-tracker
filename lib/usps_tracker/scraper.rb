@@ -48,7 +48,7 @@ class UspsTracker::Scraper
         <Zip5>90210</Zip5>
       </ZipCode>
       " + L_CSTATE_END
-    )).text.include?("80040B1A")
+      )).text.include?("80040B1A")
     #If document includes the error code "80040B1A", then not a valid user.
   end
 
